@@ -1,0 +1,119 @@
+========================================
+VSS 所有容器镜像清单（华为云版本）
+========================================
+
+必需镜像（6个）：
+----------------------------------------
+1. VSS 主服务
+   原镜像: nvcr.io/nvidia/blueprint/vss-engine:2.4.0
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/blueprint/vss-engine:2.4.0
+   大小: ~15GB
+   
+2. Neo4j 图数据库
+   原镜像: neo4j:5.26.4
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/library/neo4j:5.26.4
+   大小: ~500MB
+   
+3. ArangoDB
+   原镜像: arangodb/arangodb:3.12.4
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/arangodb/arangodb:3.12.4
+   大小: ~300MB
+   
+4. MinIO 对象存储
+   原镜像: minio/minio:latest
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/minio/minio:latest
+   大小: ~200MB
+   
+5. Milvus 向量数据库
+   原镜像: milvusdb/milvus:v2.5.4
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/milvusdb/milvus:v2.5.4
+   大小: ~1GB
+   
+6. Elasticsearch（可选，监控用）
+   原镜像: elasticsearch:9.1.2
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/library/elasticsearch:9.1.2
+   大小: ~1GB
+
+监控组件镜像（3个，仅 perf-profiling 模式）：
+----------------------------------------
+7. OpenTelemetry Collector
+   原镜像: otel/opentelemetry-collector-contrib:latest
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/otel/opentelemetry-collector-contrib:latest
+   大小: ~100MB
+   
+8. Prometheus
+   原镜像: prom/prometheus:latest
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/prom/prometheus:latest
+   大小: ~200MB
+   
+9. Jaeger
+   原镜像: jaegertracing/all-in-one:latest
+   华为云: swr.cn-southwest-2.myhuaweicloud.com/knowv/jaegertracing/all-in-one:latest
+   大小: ~50MB
+
+========================================
+镜像同步命令（使用 oras 工具）
+========================================
+
+# 1. VSS Engine
+oras cp nvcr.io/nvidia/blueprint/vss-engine:2.4.0 \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/blueprint/vss-engine:2.4.0 \
+  --platform=linux/amd64
+
+# 2. Neo4j
+oras cp docker.io/library/neo4j:5.26.4 \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/library/neo4j:5.26.4 \
+  --platform=linux/amd64
+
+# 3. ArangoDB
+oras cp docker.io/arangodb/arangodb:3.12.4 \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/arangodb/arangodb:3.12.4 \
+  --platform=linux/amd64
+
+# 4. MinIO
+oras cp docker.io/minio/minio:latest \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/minio/minio:latest \
+  --platform=linux/amd64
+
+# 5. Milvus
+oras cp docker.io/milvusdb/milvus:v2.5.4 \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/milvusdb/milvus:v2.5.4 \
+  --platform=linux/amd64
+
+# 6. Elasticsearch
+oras cp docker.io/library/elasticsearch:9.1.2 \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/library/elasticsearch:9.1.2 \
+  --platform=linux/amd64
+
+# 7. OpenTelemetry
+oras cp docker.io/otel/opentelemetry-collector-contrib:latest \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/otel/opentelemetry-collector-contrib:latest \
+  --platform=linux/amd64
+
+# 8. Prometheus
+oras cp docker.io/prom/prometheus:latest \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/prom/prometheus:latest \
+  --platform=linux/amd64
+
+# 9. Jaeger
+oras cp docker.io/jaegertracing/all-in-one:latest \
+  swr.cn-southwest-2.myhuaweicloud.com/knowv/jaegertracing/all-in-one:latest \
+  --platform=linux/amd64
+
+========================================
+验证部署使用的镜像
+========================================
+
+运行以下命令查看将要使用的镜像：
+
+# 查看环境变量
+cat .env | grep IMAGE
+
+# 查看 compose.yaml 中的镜像引用
+grep "image:" compose.yaml
+
+# 启动后查看实际使用的镜像
+docker compose ps --format "table {{.Service}}\t{{.Image}}"
+
+========================================
+

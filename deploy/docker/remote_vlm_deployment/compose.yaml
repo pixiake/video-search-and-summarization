@@ -21,8 +21,9 @@ services:
     shm_size: '16gb'
     runtime: nvidia
     ports:
-      - "${BACKEND_PORT?}:${BACKEND_PORT?}"
-      - "${FRONTEND_PORT?}:${FRONTEND_PORT?}"
+      - "0.0.0.0:${BACKEND_PORT?}:${BACKEND_PORT?}"
+      - "0.0.0.0:8085:9100"
+    #  - "0.0.0.0:${EMBEDDING_PORT?}:${EMBEDDING_PORT?}"
     volumes:
       - "${ASSET_STORAGE_DIR:-/dummy}${ASSET_STORAGE_DIR:+:/tmp/assets}"
       - "${CA_RAG_CONFIG:-/dummy}${CA_RAG_CONFIG:+:/opt/nvidia/via/default_config.yaml}"
@@ -39,6 +40,19 @@ services:
       - via-hf-cache:/tmp/huggingface
       - "${CV_PIPELINE_TRACKER_CONFIG:-/dummy}${CV_PIPELINE_TRACKER_CONFIG:+:/opt/nvidia/via/config/default_tracker_config.yml}"
       - "${ALERT_REVIEW_MEDIA_BASE_DIR:-/dummy}${ALERT_REVIEW_MEDIA_BASE_DIR:+:${ALERT_REVIEW_MEDIA_BASE_DIR:-}}"
+      - ./ui_chinese_patch.py:/opt/nvidia/ui_chinese_patch.py:ro
+      - ./change_theme.py:/opt/nvidia/change_theme.py:ro
+      - ./replace_avatar.py:/opt/nvidia/replace_avatar.py:ro
+      - ./openai_embedding_patch.py:/opt/nvidia/openai_embedding_patch.py:ro
+      - ./milvus_connection_patch.py:/opt/nvidia/milvus_connection_patch.py:ro
+      - ./start_vss_with_patch.sh:/opt/nvidia/start_vss_with_patch.sh:ro
+      - ./preload_patch.sh:/opt/nvidia/preload_patch.sh:ro
+      - ./wait_for_milvus.sh:/opt/nvidia/wait_for_milvus.sh:ro
+      - ./ca_rag_init_patch.py:/usr/local/lib/python3.12/dist-packages/vss_ctx_rag/functions/rag/foundation_rag/__init__.py:ro
+      - ./ca_rag_utils_patch.py:/usr/local/lib/python3.12/dist-packages/vss_ctx_rag/aiq/utils.py:ro
+      - ../../src/vss-engine/src/vss_api_models.py:/opt/nvidia/via/vss_api_models.py:ro
+
+    command: ["/bin/bash", "-c", "/opt/nvidia/wait_for_milvus.sh && /opt/nvidia/preload_patch.sh && /opt/nvidia/start_vss_with_patch.sh"]
 
     environment:
       AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY:-}"
@@ -64,6 +78,7 @@ services:
       TRT_LLM_MODE: "${TRT_LLM_MODE:-}"
       VIA_VLM_OPENAI_MODEL_DEPLOYMENT_NAME: "${VIA_VLM_OPENAI_MODEL_DEPLOYMENT_NAME:-}"
       VIA_VLM_API_KEY: "${VIA_VLM_API_KEY:-}"
+      VIA_VLM_ENDPOINT: "${VIA_VLM_ENDPOINT:-}"
       VLM_BATCH_SIZE: "${VLM_BATCH_SIZE:-}"
       VLM_MODEL_TO_USE: "${VLM_MODEL_TO_USE:-openai-compat}"
       GRAPH_DB_HOST: "${GRAPH_DB_HOST:-graph-db}"
@@ -71,6 +86,15 @@ services:
       GRAPH_DB_PASSWORD: "${GRAPH_DB_PASSWORD}"
       GRAPH_DB_HTTP_PORT: "${GRAPH_DB_HTTP_PORT:-7474}"
       GRAPH_DB_BOLT_PORT: "${GRAPH_DB_BOLT_PORT:-7687}"
+      LLM_MODEL_NAME: "${LLM_MODEL_NAME:-}"
+      LLM_BASE_URL: "${LLM_BASE_URL:-}"
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      EMBEDDING_MODEL_NAME: "${EMBEDDING_MODEL_NAME:-}"
+      EMBEDDING_BASE_URL: "${EMBEDDING_BASE_URL:-}"
+      EMBEDDING_API_KEY: "${EMBEDDING_API_KEY:-}"
+      # RERANKER_MODEL_NAME: "${RERANKER_MODEL_NAME:-}"
+      # RERANKER_BASE_URL: "${RERANKER_BASE_URL:-}"
+      # RERANKER_API_KEY: "${RERANKER_API_KEY:-}"
       NUM_VLM_PROCS: "${NUM_VLM_PROCS:-}"
       NUM_GPUS: "${NUM_GPUS:-}"
       FORCE_CA_RAG_RESET: "${FORCE_CA_RAG_RESET:-}"
@@ -160,10 +184,10 @@ services:
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_server_bolt_listen__address: "0.0.0.0:${GRAPH_DB_BOLT_PORT:-7687}"
       NEO4J_server_http_listen__address: "0.0.0.0:${GRAPH_DB_HTTP_PORT:-7474}"
-    image: neo4j:5.26.4
+    image: ${NEO4J_IMAGE:-neo4j:5.26.4}
 
   arango-db:
-    image: arangodb/arangodb:3.12.4
+    image: ${ARANGO_IMAGE:-arangodb/arangodb:3.12.4}
     environment:
       - ARANGO_DB_USERNAME=${ARANGO_DB_USERNAME}
       - ARANGO_ROOT_PASSWORD=${ARANGO_DB_PASSWORD}
@@ -172,7 +196,7 @@ services:
     command: ["arangod", "--experimental-vector-index", "--server.endpoint", "http://0.0.0.0:${ARANGO_DB_PORT:-8529}"]
 
   minio:
-    image: minio/minio:latest
+    image: ${MINIO_IMAGE:-minio/minio:latest}
     ports:
       - "${MINIO_PORT:-9000}:${MINIO_PORT:-9000}"
       - "${MINIO_WEBUI_PORT:-9001}:${MINIO_WEBUI_PORT:-9001}"
@@ -185,7 +209,7 @@ services:
     restart: unless-stopped
 
   milvus-standalone:
-    image: milvusdb/milvus:v2.5.4
+    image: ${MILVUS_IMAGE:-milvusdb/milvus:v2.5.4}
     command: |
       sh -c "
       cat <<EOF > /milvus/configs/embedEtcd.yaml
@@ -219,7 +243,7 @@ services:
       start_period: 90s
 
   elasticsearch:
-    image: elasticsearch:9.1.2
+    image: ${ELASTICSEARCH_IMAGE:-elasticsearch:9.1.2}
     ports:
       - "${ES_PORT:-9200}:${ES_PORT:-9200}"
       - "${ES_TRANSPORT_PORT:-9300}:${ES_TRANSPORT_PORT:-9300}"
@@ -230,7 +254,7 @@ services:
 
   # OpenTelemetry Collector - Collects and exports OTEL metrics/traces
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
+    image: ${OTEL_IMAGE:-otel/opentelemetry-collector-contrib:latest}
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./docker/deploy/otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -246,7 +270,7 @@ services:
 
   # Prometheus - Metrics collection and storage for monitoring
   prometheus:
-    image: prom/prometheus:latest
+    image: ${PROMETHEUS_IMAGE:-prom/prometheus:latest}
     ports:
       - "9090:9090"
     volumes:
@@ -267,7 +291,7 @@ services:
 
   # Jaeger - Distributed tracing system
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: ${JAEGER_IMAGE:-jaegertracing/all-in-one:latest}
     ports:
       - "16686:16686"  # Jaeger UI
       - "14268:14268"  # Jaeger collector HTTP

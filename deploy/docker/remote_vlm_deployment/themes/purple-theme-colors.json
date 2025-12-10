@@ -1,0 +1,38 @@
+{
+  "_comment": "浅紫色主题 - 替换NVIDIA绿色为优雅紫色",
+  "theme_name": "Purple Tech",
+  "primary_colors": {
+    "primary_50": "#f5f3ff",
+    "primary_100": "#ede9fe",
+    "primary_200": "#ddd6fe",
+    "primary_300": "#c4b5fd",
+    "primary_400": "#a78bfa",
+    "primary_500": "#8b5cf6",
+    "primary_600": "#7c3aed",
+    "primary_700": "#6d28d9",
+    "primary_800": "#5b21b6",
+    "primary_900": "#4c1d95",
+    "primary_950": "#2e1065"
+  },
+  "secondary_colors": {
+    "secondary_50": "#eff6ff",
+    "secondary_100": "#dbeafe",
+    "secondary_200": "#bfdbfe",
+    "secondary_300": "#93c5fd",
+    "secondary_400": "#60a5fa",
+    "secondary_500": "#3b82f6",
+    "secondary_600": "#2563eb",
+    "secondary_700": "#1d4ed8",
+    "secondary_800": "#1e40af",
+    "secondary_900": "#1e3a8a",
+    "secondary_950": "#172554"
+  },
+  "accent_color": "#8b5cf6",
+  "button_primary_background_fill": "#8b5cf6",
+  "button_primary_background_fill_hover": "#7c3aed",
+  "button_primary_border_color": "#8b5cf6",
+  "link_text_color": "#7c3aed",
+  "logo_fill": "#8B5CF6",
+  "description": "优雅的紫色主题，适合科技感和专业场景"
+}
+

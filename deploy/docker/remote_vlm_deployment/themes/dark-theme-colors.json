@@ -1,0 +1,48 @@
+{
+  "_comment": "科技黑主题 - 深色模式配色",
+  "theme_name": "Cyber Dark",
+  "primary_colors": {
+    "primary_50": "#f8fafc",
+    "primary_100": "#f1f5f9",
+    "primary_200": "#e2e8f0",
+    "primary_300": "#cbd5e1",
+    "primary_400": "#0ea5e9",
+    "primary_500": "#0284c7",
+    "primary_600": "#0369a1",
+    "primary_700": "#075985",
+    "primary_800": "#0c4a6e",
+    "primary_900": "#082f49",
+    "primary_950": "#051923"
+  },
+  "secondary_colors": {
+    "secondary_50": "#ecfeff",
+    "secondary_100": "#cffafe",
+    "secondary_200": "#a5f3fc",
+    "secondary_300": "#67e8f9",
+    "secondary_400": "#22d3ee",
+    "secondary_500": "#06b6d4",
+    "secondary_600": "#0891b2",
+    "secondary_700": "#0e7490",
+    "secondary_800": "#155e75",
+    "secondary_900": "#164e63",
+    "secondary_950": "#083344"
+  },
+  "background_colors": {
+    "background_fill_primary": "#0f172a",
+    "background_fill_secondary": "#1e293b",
+    "gradio_container_bg": "#0f172a",
+    "block_background_fill": "#1e293b"
+  },
+  "text_colors": {
+    "body_text_color": "#e2e8f0",
+    "block_label_text_color": "#cbd5e1"
+  },
+  "accent_color": "#0ea5e9",
+  "button_primary_background_fill": "#0ea5e9",
+  "button_primary_background_fill_hover": "#0284c7",
+  "button_primary_border_color": "#0ea5e9",
+  "link_text_color": "#22d3ee",
+  "logo_fill": "#0EA5E9",
+  "description": "酷炫的深色主题，科技感十足"
+}
+

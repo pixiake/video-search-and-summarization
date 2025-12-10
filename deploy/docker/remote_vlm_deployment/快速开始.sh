@@ -1,0 +1,32 @@
+#!/bin/bash
+# 快速部署引导脚本
+
+echo "======================================"
+echo "VSS 快速部署向导"
+echo "======================================"
+echo ""
+echo "请按照以下步骤操作："
+echo ""
+echo "1️⃣  编辑 deploy.sh 文件，修改配置："
+echo "   nano deploy.sh"
+echo ""
+echo "   需要修改的变量（在脚本顶部的「配置区域」）："
+echo "   - VIA_VLM_API_KEY=\"你的阿里云API密钥\""
+echo "   - LLM_BASE_URL=\"http://你的LLM服务地址/v1\""
+echo "   - EMBEDDING_BASE_URL=\"http://你的Embedding服务地址/v1\""
+echo ""
+echo "2️⃣  保存后运行部署脚本："
+echo "   ./deploy.sh"
+echo ""
+echo "3️⃣  等待服务启动（约 1-3 分钟）"
+echo ""
+echo "4️⃣  访问 Web UI："
+echo "   http://localhost:9100"
+echo ""
+echo "======================================"
+echo ""
+read -p "按 Enter 键打开编辑器修改配置..."
+${EDITOR:-nano} deploy.sh
+echo ""
+read -p "配置已修改完成？按 Enter 开始部署，或 Ctrl+C 取消..."
+./deploy.sh

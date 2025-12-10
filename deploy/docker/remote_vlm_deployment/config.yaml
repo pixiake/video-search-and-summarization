@@ -31,54 +31,54 @@ tools:
   vector_db:
     type: milvus
     params:
-      host: !ENV ${MILVUS_DB_HOST}
-      port: !ENV ${MILVUS_DB_GRPC_PORT}
+      host: milvus-standalone
+      port: "19530"
     tools:
       embedding: nvidia_embedding
 
   chat_llm:
     type: llm
     params:
-      model: meta/llama-3.1-70b-instruct
-      base_url: https://integrate.api.nvidia.com/v1
+      model: !ENV ${LLM_MODEL_NAME}
+      base_url: !ENV ${LLM_BASE_URL}
       max_tokens: 2048
       temperature: 0.2
       top_p: 0.7
-      api_key: !ENV ${NVIDIA_API_KEY}
+      api_key: !ENV ${LLM_API_KEY}
 
   summarization_llm:
     type: llm
     params:
-      model: meta/llama-3.1-70b-instruct
-      base_url: https://integrate.api.nvidia.com/v1
+      model: !ENV ${LLM_MODEL_NAME}
+      base_url: !ENV ${LLM_BASE_URL}
       max_tokens: 2048
       temperature: 0.2
       top_p: 0.7
-      api_key: !ENV ${NVIDIA_API_KEY}
+      api_key: !ENV ${LLM_API_KEY}
 
   notification_llm:
     type: llm
     params:
-      model: meta/llama-3.1-70b-instruct
-      base_url: https://integrate.api.nvidia.com/v1
+      model: !ENV ${LLM_MODEL_NAME}
+      base_url: !ENV ${LLM_BASE_URL}
       max_tokens: 2048
       temperature: 0.2
       top_p: 0.7
-      api_key: !ENV ${NVIDIA_API_KEY}
+      api_key: !ENV ${LLM_API_KEY}
 
   nvidia_embedding:
     type: embedding
     params:
-      model: nvidia/llama-3.2-nv-embedqa-1b-v2
-      base_url: https://integrate.api.nvidia.com/v1
-      api_key: !ENV ${NVIDIA_API_KEY}
+      model: !ENV ${EMBEDDING_MODEL_NAME}
+      base_url: !ENV ${EMBEDDING_BASE_URL}
+      api_key: !ENV ${EMBEDDING_API_KEY}
 
-  nvidia_reranker:
-    type: reranker
-    params:
-      model: nvidia/llama-3.2-nv-rerankqa-1b-v2
-      base_url: https://integrate.api.nvidia.com/v1
-      api_key: !ENV ${NVIDIA_API_KEY}
+  # nvidia_reranker:  # 可选组件，已禁用
+  #   type: reranker
+  #   params:
+  #     model: !ENV ${RERANKER_MODEL_NAME}
+  #     base_url: !ENV ${RERANKER_BASE_URL}
+  #     api_key: !ENV ${RERANKER_API_KEY}
 
   notification_tool:
     type: alert_sse_notifier
@@ -92,9 +92,9 @@ functions:
       batch_size: 6
       batch_max_concurrency: 20
       prompts:
-        caption: "Write a concise and clear dense caption for the provided warehouse video, focusing on irregular or hazardous events such as boxes falling, workers not wearing PPE, workers falling, workers taking photographs, workers chitchatting, forklift stuck, etc. Start and end each sentence with a time stamp."
-        caption_summarization: "You should summarize the following events of a warehouse in the format start_time:end_time:caption. For start_time and end_time use . to seperate seconds, minutes, hours. If during a time segment only regular activities happen, then ignore them, else note any irregular activities in detail. The output should be bullet points in the format start_time:end_time: detailed_event_description. Don't return anything else except the bullet points."
-        summary_aggregation: "You are a warehouse monitoring system. Given the caption in the form start_time:end_time: caption, Aggregate the following captions in the format start_time:end_time:event_description. If the event_description is the same as another event_description, aggregate the captions in the format start_time1:end_time1,...,start_timek:end_timek:event_description. If any two adjacent end_time1 and start_time2 is within a few tenths of a second, merge the captions in the format start_time1:end_time2. The output should only contain bullet points.  Cluster the output into Unsafe Behavior, Operational Inefficiencies, Potential Equipment Damage and Unauthorized Personnel"
+        caption: "请详细描述图片或视频中的内容，包括场景、人物、物体、动作、环境等关键信息。"
+        caption_summarization: "请总结以下内容的关键信息和要点。"
+        summary_aggregation: "请将以下描述整合为一个连贯的总结，突出重点内容。"
     tools:
       llm: summarization_llm
       db: graph_db

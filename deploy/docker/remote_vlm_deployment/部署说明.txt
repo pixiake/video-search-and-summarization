@@ -1,0 +1,106 @@
+======================================
+VSS 一键部署说明
+======================================
+
+📝 第 1 步：修改部署脚本
+--------------------------------------
+编辑 deploy.sh 文件：
+
+nano deploy.sh
+
+找到「配置区域」，只需修改这几行：
+
+第 23 行：VIA_VLM_API_KEY="你的阿里云API密钥"
+第 27 行：LLM_MODEL_NAME="你的LLM模型名"
+第 28 行：LLM_BASE_URL="http://你的IP:端口/v1"
+第 32 行：EMBEDDING_MODEL_NAME="你的Embedding模型名"
+第 33 行：EMBEDDING_BASE_URL="http://你的IP:端口/v1"
+
+如果不需要 API Key，留空即可。
+
+--------------------------------------
+🚀 第 2 步：运行部署脚本
+--------------------------------------
+确保 Docker Desktop 正在运行，然后：
+
+./deploy.sh
+
+脚本会自动：
+1. 检查 Docker 环境
+2. 验证配置
+3. 创建 .env 文件
+4. 拉取镜像并启动服务
+
+--------------------------------------
+🌐 第 3 步：访问服务
+--------------------------------------
+等待 30 秒后，打开浏览器：
+
+http://localhost:9100
+
+--------------------------------------
+📦 容器镜像信息
+--------------------------------------
+查看详细说明：
+
+cat 容器镜像说明.md
+
+主要镜像列表：
+1. nvcr.io/nvidia/blueprint/vss-engine:2.4.0 (15GB) - VSS 主服务
+2. neo4j:5.26.4 (500MB) - 图数据库
+3. arangodb/arangodb:3.12.4 (300MB) - ArangoDB
+4. minio/minio:latest (200MB) - 对象存储
+5. milvusdb/milvus:v2.5.4 (1GB) - 向量数据库
+
+总共需要约 17GB 磁盘空间
+
+--------------------------------------
+🔧 常用命令
+--------------------------------------
+查看服务状态：
+  docker compose ps
+
+查看日志：
+  docker compose logs -f via-server
+
+重启服务：
+  docker compose restart via-server
+
+停止服务：
+  docker compose down
+
+完全清理（删除数据）：
+  docker compose down -v
+
+--------------------------------------
+🔄 如何替换镜像
+--------------------------------------
+方法 1：修改 deploy.sh 脚本
+找到第 79-84 行「容器镜像配置」部分，修改镜像地址
+
+方法 2：修改 .env 文件
+添加：VIA_IMAGE=your-custom-image:tag
+
+详细说明见：容器镜像说明.md
+
+--------------------------------------
+❓ 故障排查
+--------------------------------------
+1. 服务启动失败
+   - 检查 Docker 是否运行
+   - 查看日志：docker compose logs via-server
+
+2. VLM API 连接失败
+   - 确认 VIA_VLM_API_KEY 是否正确
+   - 测试：curl -H "Authorization: Bearer YOUR_KEY" \
+           https://dashscope.aliyuncs.com/compatible-mode/v1/models
+
+3. LLM 连接失败
+   - 确认 LLM_BASE_URL 是否可访问
+   - 测试：curl http://你的LLM地址/v1/models
+
+4. 端口被占用
+   - 修改 deploy.sh 中的 BACKEND_PORT 和 FRONTEND_PORT
+
+======================================
+
